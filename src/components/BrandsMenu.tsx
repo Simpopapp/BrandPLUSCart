@@ -1,29 +1,8 @@
-import * as React from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { BrandsMenuHeader } from "./brands/BrandsMenuHeader";
 import { BrandsCarousel } from "./brands/BrandsCarousel";
-
-const brandMenuItems = [
-  {
-    id: "elfbar",
-    name: "Elf Bar",
-    image: "/placeholder.svg",
-    route: "/elfbar"
-  },
-  {
-    id: "lostmary",
-    name: "Lost Mary",
-    image: "/placeholder.svg",
-    route: "/lostmary"
-  },
-  {
-    id: "oxbar",
-    name: "Ox Bar",
-    image: "/placeholder.svg",
-    route: "/oxbar"
-  }
-];
+import { BrandsMenuHeader } from "./brands/BrandsMenuHeader";
 
 export function BrandsMenu() {
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -41,53 +20,46 @@ export function BrandsMenu() {
 
   React.useEffect(() => {
     const handleScroll = () => {
-      if (!menuRef.current) return;
-
-      const menuPosition = menuRef.current.getBoundingClientRect();
-      const menuTop = menuPosition.top;
-      const menuBottom = menuPosition.bottom;
       const currentScrollY = window.scrollY;
-      const isScrollingUp = currentScrollY < lastScrollY;
-
-      if (menuBottom < 0) {
+      
+      if (currentScrollY > 100) {
         setIsSticky(true);
-        if (!isCollapsed && !manualExpand) {
+        
+        if (currentScrollY > lastScrollY && !manualExpand) {
           setIsCollapsed(true);
+        } else if (currentScrollY < lastScrollY && manualExpand) {
+          setIsCollapsed(false);
         }
       } else {
         setIsSticky(false);
-      }
-
-      if (isScrollingUp && menuTop > -100 && isCollapsed && !manualExpand) {
         setIsCollapsed(false);
       }
-
+      
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isCollapsed, lastScrollY, manualExpand]);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY, manualExpand]);
 
   const handleToggleCollapse = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsCollapsed(!isCollapsed);
-    setManualExpand(true);
+    setManualExpand(!isCollapsed);
   };
 
-  const handleHeaderClick = (e: React.MouseEvent) => {
-    const target = e.currentTarget as HTMLDivElement;
-    const rect = target.getBoundingClientRect();
-    const clickY = e.clientY - rect.top;
-
-    if (clickY <= 96 && isSticky) {
-      setIsCollapsed(!isCollapsed);
+  const handleHeaderClick = () => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
       setManualExpand(true);
     }
   };
 
   return (
-    <div className="relative mb-24" ref={menuRef}>
+    <div className="relative mb-48" ref={menuRef}>
       {/* Spacer div that's always present to maintain layout */}
       <div 
         style={{ height: menuHeight }}
@@ -97,16 +69,13 @@ export function BrandsMenu() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{
-          height: isCollapsed ? "96px" : "auto",
-          minHeight: isCollapsed ? "96px" : "300px",
           opacity: 1,
+          height: isCollapsed ? "auto" : "auto",
         }}
-        transition={{ 
-          duration: 0.5, 
+        transition={{
+          duration: 0.3,
           ease: "easeInOut",
-          layout: true 
         }}
-        layout
         className={cn(
           "w-full bg-gradient-to-b from-secondary/80 to-secondary/40 backdrop-blur-md z-40 shadow-lg overflow-hidden",
           !isCollapsed && "py-12",
@@ -115,18 +84,18 @@ export function BrandsMenu() {
         )}
         onClick={handleHeaderClick}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-gold/5 opacity-50" />
-        
-        <BrandsMenuHeader 
+        <BrandsMenuHeader
           isCollapsed={isCollapsed}
           handleToggleCollapse={handleToggleCollapse}
         />
 
         <AnimatePresence>
-          <BrandsCarousel 
-            isCollapsed={isCollapsed}
-            brandMenuItems={brandMenuItems}
-          />
+          {!isCollapsed && (
+            <BrandsCarousel
+              isCollapsed={isCollapsed}
+              handleToggleCollapse={handleToggleCollapse}
+            />
+          )}
         </AnimatePresence>
       </motion.div>
     </div>
