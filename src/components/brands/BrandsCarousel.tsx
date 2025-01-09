@@ -24,7 +24,7 @@ interface BrandsCarouselProps {
 export function BrandsCarousel({ isCollapsed, brandMenuItems }: BrandsCarouselProps) {
   const navigate = useNavigate();
 
-  if (isCollapsed || !brandMenuItems) return null;
+  if (isCollapsed) return null;
 
   return (
     <motion.div 

@@ -1,8 +1,8 @@
-import React from "react";
+import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { BrandsCarousel } from "./brands/BrandsCarousel";
 import { BrandsMenuHeader } from "./brands/BrandsMenuHeader";
+import { BrandsCarousel } from "./brands/BrandsCarousel";
 
 const brandMenuItems = [
   {
@@ -41,46 +41,54 @@ export function BrandsMenu() {
 
   React.useEffect(() => {
     const handleScroll = () => {
+      if (!menuRef.current) return;
+
+      const menuPosition = menuRef.current.getBoundingClientRect();
+      const menuTop = menuPosition.top;
+      const menuBottom = menuPosition.bottom;
       const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > 100) {
+      const isScrollingUp = currentScrollY < lastScrollY;
+
+      if (menuBottom < 0) {
         setIsSticky(true);
-        
-        if (currentScrollY > lastScrollY && !manualExpand) {
+        if (!isCollapsed && !manualExpand) {
           setIsCollapsed(true);
-        } else if (currentScrollY < lastScrollY && manualExpand) {
-          setIsCollapsed(false);
         }
       } else {
         setIsSticky(false);
+      }
+
+      if (isScrollingUp && menuTop > -100 && isCollapsed && !manualExpand) {
         setIsCollapsed(false);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [lastScrollY, manualExpand]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isCollapsed, lastScrollY, manualExpand]);
 
   const handleToggleCollapse = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsCollapsed(!isCollapsed);
-    setManualExpand(!isCollapsed);
+    setManualExpand(true);
   };
 
-  const handleHeaderClick = () => {
-    if (isCollapsed) {
-      setIsCollapsed(false);
+  const handleHeaderClick = (e: React.MouseEvent) => {
+    const target = e.currentTarget as HTMLDivElement;
+    const rect = target.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+
+    if (clickY <= 96 && isSticky) {
+      setIsCollapsed(!isCollapsed);
       setManualExpand(true);
     }
   };
 
   return (
-    <div className="relative mb-48" ref={menuRef}>
+    <div className="relative mb-24" ref={menuRef}>
+      {/* Spacer div that's always present to maintain layout */}
       <div 
         style={{ height: menuHeight }}
         className="transition-all duration-500"
@@ -89,13 +97,16 @@ export function BrandsMenu() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{
+          height: isCollapsed ? "96px" : "auto",
+          minHeight: isCollapsed ? "96px" : "300px",
           opacity: 1,
-          height: isCollapsed ? "auto" : "auto",
         }}
-        transition={{
-          duration: 0.3,
+        transition={{ 
+          duration: 0.5, 
           ease: "easeInOut",
+          layout: true 
         }}
+        layout
         className={cn(
           "w-full bg-gradient-to-b from-secondary/80 to-secondary/40 backdrop-blur-md z-40 shadow-lg overflow-hidden",
           !isCollapsed && "py-12",
@@ -104,18 +115,18 @@ export function BrandsMenu() {
         )}
         onClick={handleHeaderClick}
       >
-        <BrandsMenuHeader
+        <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-gold/5 opacity-50" />
+        
+        <BrandsMenuHeader 
           isCollapsed={isCollapsed}
           handleToggleCollapse={handleToggleCollapse}
         />
 
         <AnimatePresence>
-          {!isCollapsed && (
-            <BrandsCarousel
-              isCollapsed={isCollapsed}
-              brandMenuItems={brandMenuItems}
-            />
-          )}
+          <BrandsCarousel 
+            isCollapsed={isCollapsed}
+            brandMenuItems={brandMenuItems}
+          />
         </AnimatePresence>
       </motion.div>
     </div>
