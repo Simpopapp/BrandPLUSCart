@@ -4,6 +4,27 @@ import { cn } from "@/lib/utils";
 import { BrandsCarousel } from "./brands/BrandsCarousel";
 import { BrandsMenuHeader } from "./brands/BrandsMenuHeader";
 
+const brandMenuItems = [
+  {
+    id: "elfbar",
+    name: "Elf Bar",
+    image: "/placeholder.svg",
+    route: "/elfbar"
+  },
+  {
+    id: "lostmary",
+    name: "Lost Mary",
+    image: "/placeholder.svg",
+    route: "/lostmary"
+  },
+  {
+    id: "oxbar",
+    name: "Ox Bar",
+    image: "/placeholder.svg",
+    route: "/oxbar"
+  }
+];
+
 export function BrandsMenu() {
   const menuRef = React.useRef<HTMLDivElement>(null);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
@@ -93,7 +114,7 @@ export function BrandsMenu() {
           {!isCollapsed && (
             <BrandsCarousel
               isCollapsed={isCollapsed}
-              handleToggleCollapse={handleToggleCollapse}
+              brandMenuItems={brandMenuItems}
             />
           )}
         </AnimatePresence>
