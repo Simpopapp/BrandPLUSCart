@@ -88,7 +88,7 @@ export function BrandsMenu() {
   };
 
   return (
-    <div className="relative mb-48" ref={menuRef}>
+    <div className="relative mb-96" ref={menuRef}>
       {/* Spacer div that maintains layout */}
       <div 
         style={{ height: menuHeight }}
