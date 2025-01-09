@@ -1,4 +1,5 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { debounce } from "lodash";
 
 export function useBrandsMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -8,8 +9,9 @@ export function useBrandsMenu() {
   const [manualExpand, setManualExpand] = useState(false);
   const [menuHeight] = useState(400); // Fixed height for consistency
 
-  useEffect(() => {
-    const handleScroll = () => {
+  // Memoize the scroll handler to prevent unnecessary re-renders
+  const handleScroll = useCallback(
+    debounce(() => {
       if (!menuRef.current) return;
 
       const menuPosition = menuRef.current.getBoundingClientRect();
@@ -18,31 +20,58 @@ export function useBrandsMenu() {
       const currentScrollY = window.scrollY;
       const isScrollingUp = currentScrollY < lastScrollY;
 
-      // Update sticky state
-      if (menuBottom < 0) {
+      // Update sticky state with threshold
+      if (menuBottom < -10) { // Added threshold to prevent flickering
         setIsSticky(true);
         if (!isCollapsed && !manualExpand) {
           setIsCollapsed(true);
         }
-      } else {
+      } else if (menuBottom > 10) { // Added threshold for unsticking
         setIsSticky(false);
       }
 
-      // Handle auto-expand on scroll up
-      if (isScrollingUp && menuTop > -100 && isCollapsed && !manualExpand) {
+      // Handle auto-expand on scroll up with improved conditions
+      if (isScrollingUp && 
+          menuTop > -100 && 
+          isCollapsed && 
+          !manualExpand && 
+          Math.abs(currentScrollY - lastScrollY) > 50) { // Added minimum scroll delta
         setIsCollapsed(false);
       }
 
       setLastScrollY(currentScrollY);
-    };
+    }, 50, { leading: true, trailing: true }), // Debounce with both leading and trailing calls
+    [isCollapsed, lastScrollY, manualExpand]
+  );
 
+  useEffect(() => {
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isCollapsed, lastScrollY, manualExpand]);
+    
+    // Reset states when component mounts
+    setIsCollapsed(false);
+    setIsSticky(false);
+    setManualExpand(false);
+    setLastScrollY(window.scrollY);
+
+    return () => {
+      handleScroll.cancel(); // Cancel any pending debounced calls
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
+
+  // Reset manual expand after a delay when menu is manually toggled
+  useEffect(() => {
+    if (manualExpand) {
+      const timer = setTimeout(() => {
+        setManualExpand(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [manualExpand]);
 
   const handleToggleCollapse = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsCollapsed(!isCollapsed);
+    setIsCollapsed((prev) => !prev);
     setManualExpand(true);
   };
 
@@ -52,7 +81,7 @@ export function useBrandsMenu() {
     const clickY = e.clientY - rect.top;
 
     if (clickY <= 96 && isSticky) {
-      setIsCollapsed(!isCollapsed);
+      setIsCollapsed((prev) => !prev);
       setManualExpand(true);
     }
   };
