@@ -6,9 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { Cart } from "@/components/Cart";
 import Index from "./pages/Index";
-import ElfBar from "./pages/ElfBar";
-import LostMary from "./pages/LostMary";
-import OxBar from "./pages/OxBar";
 
 const queryClient = new QueryClient();
 
@@ -25,9 +22,6 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/elfbar" element={<ElfBar />} />
-              <Route path="/lostmary" element={<LostMary />} />
-              <Route path="/oxbar" element={<OxBar />} />
             </Routes>
           </BrowserRouter>
         </div>
