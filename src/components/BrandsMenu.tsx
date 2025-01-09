@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { BrandsMenuHeader } from "./brands/BrandsMenuHeader";
 import { BrandsCarousel } from "./brands/BrandsCarousel";
+import { useBrandsMenu } from "@/hooks/useBrandsMenu";
 
 const brandMenuItems = [
   {
@@ -26,66 +27,14 @@ const brandMenuItems = [
 ];
 
 export function BrandsMenu() {
-  const menuRef = React.useRef<HTMLDivElement>(null);
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [isSticky, setIsSticky] = React.useState(false);
-  const [lastScrollY, setLastScrollY] = React.useState(0);
-  const [manualExpand, setManualExpand] = React.useState(false);
-  const [menuHeight, setMenuHeight] = React.useState<number>(0);
-
-  React.useEffect(() => {
-    if (menuRef.current) {
-      // Set a fixed height that accounts for both collapsed and expanded states
-      setMenuHeight(400); // This value should match the expanded menu height
-    }
-  }, []);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      if (!menuRef.current) return;
-
-      const menuPosition = menuRef.current.getBoundingClientRect();
-      const menuTop = menuPosition.top;
-      const menuBottom = menuPosition.bottom;
-      const currentScrollY = window.scrollY;
-      const isScrollingUp = currentScrollY < lastScrollY;
-
-      if (menuBottom < 0) {
-        setIsSticky(true);
-        if (!isCollapsed && !manualExpand) {
-          setIsCollapsed(true);
-        }
-      } else {
-        setIsSticky(false);
-      }
-
-      if (isScrollingUp && menuTop > -100 && isCollapsed && !manualExpand) {
-        setIsCollapsed(false);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isCollapsed, lastScrollY, manualExpand]);
-
-  const handleToggleCollapse = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsCollapsed(!isCollapsed);
-    setManualExpand(true);
-  };
-
-  const handleHeaderClick = (e: React.MouseEvent) => {
-    const target = e.currentTarget as HTMLDivElement;
-    const rect = target.getBoundingClientRect();
-    const clickY = e.clientY - rect.top;
-
-    if (clickY <= 96 && isSticky) {
-      setIsCollapsed(!isCollapsed);
-      setManualExpand(true);
-    }
-  };
+  const {
+    menuRef,
+    isCollapsed,
+    isSticky,
+    menuHeight,
+    handleToggleCollapse,
+    handleHeaderClick
+  } = useBrandsMenu();
 
   return (
     <div className="relative mb-96" ref={menuRef}>
