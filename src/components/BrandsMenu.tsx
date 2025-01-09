@@ -81,7 +81,6 @@ export function BrandsMenu() {
 
   return (
     <div className="relative mb-48" ref={menuRef}>
-      {/* Spacer div that's always present to maintain layout */}
       <div 
         style={{ height: menuHeight }}
         className="transition-all duration-500"
