@@ -35,9 +35,10 @@ export function BrandsMenu() {
 
   React.useEffect(() => {
     if (menuRef.current) {
-      setMenuHeight(menuRef.current.offsetHeight);
+      // Set a fixed height that accounts for both collapsed and expanded states
+      setMenuHeight(400); // This value should match the expanded menu height
     }
-  }, [isCollapsed]);
+  }, []);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -87,8 +88,8 @@ export function BrandsMenu() {
   };
 
   return (
-    <div className="relative mb-24" ref={menuRef}>
-      {/* Spacer div that's always present to maintain layout */}
+    <div className="relative mb-48" ref={menuRef}>
+      {/* Spacer div that maintains layout */}
       <div 
         style={{ height: menuHeight }}
         className="transition-all duration-500"
@@ -123,10 +124,12 @@ export function BrandsMenu() {
         />
 
         <AnimatePresence>
-          <BrandsCarousel 
-            isCollapsed={isCollapsed}
-            brandMenuItems={brandMenuItems}
-          />
+          {!isCollapsed && (
+            <BrandsCarousel 
+              isCollapsed={isCollapsed}
+              brandMenuItems={brandMenuItems}
+            />
+          )}
         </AnimatePresence>
       </motion.div>
     </div>
