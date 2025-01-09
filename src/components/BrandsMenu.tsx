@@ -31,6 +31,13 @@ export function BrandsMenu() {
   const [isSticky, setIsSticky] = React.useState(false);
   const [lastScrollY, setLastScrollY] = React.useState(0);
   const [manualExpand, setManualExpand] = React.useState(false);
+  const [menuHeight, setMenuHeight] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (menuRef.current) {
+      setMenuHeight(menuRef.current.offsetHeight);
+    }
+  }, [isCollapsed]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -81,6 +88,12 @@ export function BrandsMenu() {
 
   return (
     <div className="relative mb-24" ref={menuRef}>
+      {/* Spacer div that's always present to maintain layout */}
+      <div 
+        style={{ height: menuHeight }}
+        className="transition-all duration-500"
+      />
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{
@@ -98,7 +111,7 @@ export function BrandsMenu() {
           "w-full bg-gradient-to-b from-secondary/80 to-secondary/40 backdrop-blur-md z-40 shadow-lg overflow-hidden",
           !isCollapsed && "py-12",
           isCollapsed && "cursor-pointer",
-          isSticky ? "fixed top-0 left-0 right-0" : "relative"
+          isSticky ? "fixed top-0 left-0 right-0" : "absolute top-0 left-0 right-0"
         )}
         onClick={handleHeaderClick}
       >
@@ -116,16 +129,6 @@ export function BrandsMenu() {
           />
         </AnimatePresence>
       </motion.div>
-
-      {/* Spacer div to maintain layout when menu becomes fixed */}
-      {isSticky && (
-        <div 
-          className={cn(
-            "w-full transition-all duration-500",
-            isCollapsed ? "h-24" : "h-[300px]"
-          )} 
-        />
-      )}
     </div>
   );
 }
