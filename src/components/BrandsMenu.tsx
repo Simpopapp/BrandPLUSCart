@@ -88,11 +88,16 @@ export function BrandsMenu() {
           minHeight: isCollapsed ? "96px" : "300px",
           opacity: 1,
         }}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
+        transition={{ 
+          duration: 0.5, 
+          ease: "easeInOut",
+          layout: true 
+        }}
+        layout
         className={cn(
-          "relative w-full bg-gradient-to-b from-secondary/80 to-secondary/40 backdrop-blur-md z-40 shadow-lg overflow-hidden",
+          "fixed top-0 left-0 right-0 w-full bg-gradient-to-b from-secondary/80 to-secondary/40 backdrop-blur-md z-40 shadow-lg overflow-hidden",
           !isCollapsed && "py-12",
-          isSticky && "fixed top-0 left-0 right-0",
+          !isSticky && "relative",
           isCollapsed && "cursor-pointer"
         )}
         onClick={handleHeaderClick}
@@ -111,6 +116,14 @@ export function BrandsMenu() {
           />
         </AnimatePresence>
       </motion.div>
+      
+      {/* Spacer div to prevent content jump */}
+      {isSticky && (
+        <div className={cn(
+          "w-full transition-all duration-500",
+          isCollapsed ? "h-24" : "h-[300px]"
+        )} />
+      )}
     </div>
   );
 }
